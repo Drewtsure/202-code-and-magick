@@ -186,8 +186,8 @@ var dragElement = function (evt, element) {
     document.removeEventListener('mouseup', onMouseUp);
 
     if (dragged) {
-      var onClickPreventDefault = function (evt) {
-        evt.preventDefault();
+      var onClickPreventDefault = function (preventEvt) {
+        preventEvt.preventDefault();
         setupAvatar.removeEventListener('click', onClickPreventDefault);
       };
       setupAvatar.addEventListener('click', onClickPreventDefault);
