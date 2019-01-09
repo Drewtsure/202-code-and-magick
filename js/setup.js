@@ -59,6 +59,12 @@ var setupCloseButton = setupWindow.querySelector('.setup-close');
 var setupNameInput = setupWindow.querySelector('.setup-user-name');
 var similarWizards = setupWindow.querySelector('.setup-similar');
 
+// Начальные координаты окна при открытии страницы
+var setupWindowCoords = {
+  x: getComputedStyle(setupWindow).top,
+  y: getComputedStyle(setupWindow).left
+};
+
 // Создание массива волшебников и фрагмента для вставки в DOM
 var wizardsList = createWizardsList(WIZARDS_QUANTITY);
 var wizardsFragment = createWizardsFragment(wizardsList);
@@ -85,6 +91,10 @@ var onSetupClose = function () {
   setupCloseButton.removeEventListener('click', onSetupClose);
   document.removeEventListener('keydown', onDocumentEscPress);
   setupCloseButton.removeEventListener('keydown', onSetupCloseEnterPress);
+
+  // Возвращение окна на его первоначальное место
+  setupWindow.style.top = setupWindowCoords.x;
+  setupWindow.style.left = setupWindowCoords.y;
 };
 
 
@@ -134,4 +144,61 @@ playerCoatColor.addEventListener('click', function (evt) {
 
 playerFireballColor.addEventListener('click', function (evt) {
   changeWizardsPartColor(evt, FIREBALL_COLOR_LIST, 'background-color', 'fireball-color');
+});
+
+// Перетаскивание окна персонажа
+
+var setupAvatar = setupWindow.querySelector('.upload');
+
+var dragElement = function (evt, element) {
+  evt.preventDefault();
+
+  var startCoords = {
+    x: evt.clientX,
+    y: evt.clientY
+  };
+
+  var dragged = false;
+
+  var onMouseMove = function (moveEvt) {
+    moveEvt.preventDefault();
+
+    dragged = true;
+
+    var shift = {
+      x: startCoords.x - moveEvt.clientX,
+      y: startCoords.y - moveEvt.clientY
+    };
+
+    startCoords = {
+      x: moveEvt.clientX,
+      y: moveEvt.clientY
+    };
+
+    element.style.top = (element.offsetTop - shift.y) + 'px';
+    element.style.left = (element.offsetLeft - shift.x) + 'px';
+  };
+
+  var onMouseUp = function (upEvt) {
+    upEvt.preventDefault();
+
+    document.removeEventListener('mousemove', onMouseMove);
+    document.removeEventListener('mouseup', onMouseUp);
+
+    if (dragged) {
+      var onClickPreventDefault = function (evt) {
+        evt.preventDefault();
+        setupAvatar.removeEventListener('click', onClickPreventDefault);
+      };
+      setupAvatar.addEventListener('click', onClickPreventDefault);
+    }
+  };
+
+  document.addEventListener('mousemove', onMouseMove);
+  document.addEventListener('mouseup', onMouseUp);
+
+};
+
+setupAvatar.addEventListener('mousedown', function (evt) {
+  dragElement(evt, setupWindow);
 });
